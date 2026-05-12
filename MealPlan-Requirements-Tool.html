@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MealPlan – Requirements Tool</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #181c27;
+    --surface2: #1e2333;
+    --border: #2a3044;
+    --accent: #4f8ef7;
+    --accent2: #f7c948;
+    --green: #3ecf8e;
+    --red: #f76e6e;
+    --orange: #f7a84f;
+    --text: #e8eaf0;
+    --muted: #6b7394;
+    --tag-func: rgba(79,142,247,0.15);
+    --tag-nonfunc: rgba(62,207,142,0.15);
+    --tag-legal: rgba(247,110,110,0.15);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+
+  .logo-text {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    color: var(--text);
+  }
+
+  .logo-sub {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .header-stats {
+    display: flex; gap: 24px;
+  }
+
+  .stat {
+    text-align: center;
+  }
+
+  .stat-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--accent);
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  /* TOOLBAR */
+  .toolbar {
+    padding: 16px 40px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .filter-btn:hover, .filter-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(79,142,247,0.08);
+  }
+
+  .view-toggle {
+    margin-left: auto;
+    display: flex;
+    gap: 4px;
+  }
+
+  .view-btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .view-btn.active {
+    background: var(--surface2);
+    color: var(--text);
+    border-color: var(--accent);
+  }
+
+  /* MAIN */
+  main {
+    padding: 32px 40px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* CARD GRID */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(560px, 1fr));
+    gap: 20px;
+  }
+
+  .req-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .req-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .card-header {
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+
+  .card-id {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--accent);
+    background: rgba(79,142,247,0.1);
+    padding: 3px 10px;
+    border-radius: 4px;
+  }
+
+  .card-meta {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .tag {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    padding: 3px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .tag-functional { background: var(--tag-func); color: var(--accent); }
+  .tag-nonfunctional { background: var(--tag-nonfunc); color: var(--green); }
+  .tag-legal { background: var(--tag-legal); color: var(--red); border: 1px solid rgba(247,110,110,0.3); }
+
+  .priority-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .prio-high { background: rgba(247,110,110,0.15); color: var(--red); }
+  .prio-medium { background: rgba(247,168,79,0.15); color: var(--orange); }
+  .prio-low { background: rgba(107,115,148,0.15); color: var(--muted); }
+
+  .card-body {
+    padding: 20px;
+    display: grid;
+    gap: 12px;
+  }
+
+  .field-row {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    gap: 8px;
+    align-items: start;
+  }
+
+  .field-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    padding-top: 1px;
+  }
+
+  .field-value {
+    font-size: 13.5px;
+    color: var(--text);
+    line-height: 1.5;
+  }
+
+  .field-value.mono {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: #a0a8c0;
+  }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 4px 0;
+  }
+
+  /* Satisfaction bars */
+  .sat-bars {
+    display: flex;
+    gap: 16px;
+  }
+
+  .sat-item {
+    flex: 1;
+  }
+
+  .sat-label {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 5px;
+  }
+
+  .sat-bar-bg {
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .sat-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 1s ease;
+  }
+
+  .fill-green { background: var(--green); }
+  .fill-red { background: var(--red); }
+
+  .sat-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--text);
+    margin-top: 4px;
+  }
+
+  /* conflicts badge */
+  .conflict-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(247,168,79,0.1);
+    border: 1px solid rgba(247,168,79,0.3);
+    color: var(--orange);
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 6px;
+  }
+
+  .legal-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(247,110,110,0.1);
+    border: 1px solid rgba(247,110,110,0.3);
+    color: var(--red);
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: 600;
+  }
+
+  /* TABLE VIEW */
+  .table-view {
+    display: none;
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  th {
+    background: var(--surface2);
+    padding: 12px 14px;
+    text-align: left;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.4;
+  }
+
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* footer */
+  .card-footer {
+    padding: 10px 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .usecase-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .history-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  /* project info banner */
+  .project-banner {
+    background: linear-gradient(135deg, rgba(79,142,247,0.08), rgba(62,207,142,0.05));
+    border: 1px solid rgba(79,142,247,0.2);
+    border-radius: 12px;
+    padding: 20px 28px;
+    margin-bottom: 28px;
+    display: flex;
+    gap: 32px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .project-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    color: var(--text);
+  }
+
+  .project-desc {
+    font-size: 14px;
+    color: var(--muted);
+    max-width: 600px;
+    line-height: 1.6;
+    margin-top: 6px;
+  }
+
+  .section-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  @media (max-width: 700px) {
+    main { padding: 20px 16px; }
+    header { padding: 16px; }
+    .toolbar { padding: 12px 16px; }
+    .cards-grid { grid-template-columns: 1fr; }
+    .field-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">🍽</div>
+    <div>
+      <div class="logo-text">MealPlan REQ</div>
+      <div class="logo-sub">Requirements Management Tool</div>
+    </div>
+  </div>
+  <div class="header-stats">
+    <div class="stat">
+      <div class="stat-num">8</div>
+      <div class="stat-label">Requirements</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">5</div>
+      <div class="stat-label">Funktional</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">1</div>
+      <div class="stat-label">Rechtlich</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">v1.0</div>
+      <div class="stat-label">Version</div>
+    </div>
+  </div>
+</header>
+
+<div class="toolbar">
+  <button class="filter-btn active" onclick="filterCards('all', this)">Alle (8)</button>
+  <button class="filter-btn" onclick="filterCards('Funktional', this)">Funktional (5)</button>
+  <button class="filter-btn" onclick="filterCards('Nicht-funktional', this)">Nicht-funktional (2)</button>
+  <button class="filter-btn" onclick="filterCards('Rechtlich', this)">Rechtlich (1)</button>
+  <button class="filter-btn" onclick="filterCards('Hoch', this)">Priorität: Hoch</button>
+  <div class="view-toggle">
+    <button class="view-btn active" onclick="setView('cards', this)">⊞ Karten</button>
+    <button class="view-btn" onclick="setView('table', this)">☰ Tabelle</button>
+  </div>
+</div>
+
+<main>
+  <div class="project-banner">
+    <div>
+      <div class="project-name">MealPlan</div>
+      <div class="project-desc">Wöchentlicher Menüplaner für Einzelpersonen mit automatischer Einkaufslistengenerierung. Ziel: Ernährungsvielfalt fördern und den Alltag vereinfachen.</div>
+    </div>
+    <div style="margin-left:auto; text-align:right;">
+      <div style="font-family:'DM Mono',monospace; font-size:11px; color:var(--muted);">ORIGINATOR</div>
+      <div style="font-size:14px; margin-top:4px;">Pham Dinh Gia Cuong</div>
+      <div style="font-family:'DM Mono',monospace; font-size:11px; color:var(--muted); margin-top:8px;">ERSTELLT AM</div>
+      <div style="font-size:14px; margin-top:4px;">10.05.2026</div>
+    </div>
+  </div>
+
+  <div class="section-title">Requirements</div>
+
+  <!-- CARDS VIEW -->
+  <div class="cards-grid" id="cardsView">
+
+    <!-- REQ No.1 -->
+    <div class="req-card" data-type="Funktional" data-priority="Hoch">
+      <div class="card-header">
+        <span class="card-id">No.1</span>
+        <div class="card-meta">
+          <span class="tag tag-functional">Funktional</span>
+          <span class="priority-badge prio-high">Hoch</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="field-row">
+          <span class="field-label">Description</span>
+          <span class="field-value">Anzeigen von Wochenplan (Montag bis Sonntag) mit je einem unterschiedlichen Hauptgericht pro Tag.</span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Rationale</span>
+          <span class="field-value">Kernfunktion der Anwendung. Ohne das ergibt alles keinen Sinn.</span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Originator</span>
+          <span class="field-value">Pham Dinh Gia Cuong</span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Fit Criterion</span>
+          <span class="field-value">Plan zeigt 7 Tage mit je einem Gericht. Kein Gericht erscheint doppelt in derselben Woche.</span>
+        </div>
+        <div class="divider"></div>
+        <div class="sat-bars">
+          <div class="sat-item">
+            <div class="sat-label">Customer Satisfaction</div>
+            <div class="sat-bar-bg"><div class="sat-bar-fill fill-green" style="width:100%"></div></div>
+            <div class="sat-val">5 / 5</div>
+          </div>
+          <div class="sat-item">
+            <div class="sat-label">Customer Dissatisfaction</div>
+            <div class="sat-bar-bg"><div class="sat-bar-fill fill-red" style="width:100%"></div></div>
+            <div class="sat-val">5 / 5</div>
+          </div>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Conflicts</span>
+          <span class="field-value mono">Keine</span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Supporting Materials</span>
+          <span class="field-value mono">roadmap.md, feature-wochenplan.md</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="usecase-tag">UC-01 · Wochenplan aufrufen</span>
+        <span class="history-tag">v1.0 · 10.05.2026</span>
+      </div>
+    </div>
+
+    <!-- REQ No.2 -->
+    <div class="req-card" data-type="Funktional" data-priority="Hoch">
+      <div class="card-header">
+        <span class="card-id">No.2</span>
+        <div class="card-meta">
+          <span class="tag tag-functional">Funktional</span>
+          <span class="priority-badge prio-high">Hoch</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="field-row">
+          <span class="field-label">Description</span>
+          <span class="field-value">Verwaltung einer Rezeptdatenbank mit mindestens 14 Einträgen inkl. Name, Zutaten, Kategorie und Zubereitungszeit.</span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Rationale</span>
+          <span class="field-value">Mindestanzahl von 14 Rezepten stellt sicher, dass zwei unterschiedliche Wochen planbar sind ohne Wiederholung.</span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Originator</span>
+          <span class="field-value">Pham Dinh Gia Cuong</span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Fit Criterion</span>
+          <span class="field-value">Datenbank enthält ≥ 14 Rezepte. Jedes Rezept hat alle Pflichtfelder befüllt.</span>
+        </div>
+        <div class="divider"></div>
+        <div class="sat-bars">
+          <div class="sat-item">
+            <div class="sat-label">Customer Satisfaction</div>
+            <div class="sat-bar-bg"><div class="sat-bar-fill fill-green" style="width:80%"></div></div>
+            <div class="sat-val">4 / 5</div>
+          </div>
+          <div class="sat-item">
+            <div class="sat-label">Customer Dissatisfaction</div>
+            <div class="sat-bar-bg"><div class="sat-bar-fill fill-red" style="width:100%"></div></div>
+            <div class="sat-val">5 / 5</div>
+          </div>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Conflicts</span>
+          <span class="field-value mono">Keine</span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Supporting Materials</span>
+          <span class="field-value mono">techstack.md</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="usecase-tag">UC-02 · Rezept hinzufügen</span>
+        <span class="history-tag">v1.0 · 10.05.2026</span>
+      </div>
+    </div>
+
+    <!-- REQ-003 -->
+    <div class="req-card" data-type="Funktional" data-priority="Hoch">
+      <div class="card-header">
+        <span class="card-id">REQ-003</span>
+        <div class="card-meta">
+          <span class="tag tag-functional">Funktional</span>
+          <span class="priority-badge prio-high">Hoch</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="field-row">
+          <span class="field-label">Description</span>
+          <span class="field-value">Das System generiert automatisch eine konsolidierte Einkaufsliste aus allen 7 Gerichten des Wochenplans.</span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Rationale</span>
+          <span class="field-value">Nutzer sollen nicht manuell Zutaten zusammensuchen müssen. Gleiche Zutaten werden summiert und nach Kategorien sortiert.</span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Originator</span>
+          <span class="field-value">Pham Dinh Gia Cuong</span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Fit Criterion</span>
+          <span class="field-value">Liste enthält alle Zutaten der 7 Wochengerichte. Doppelte Zutaten korrekt addiert (z.B. 200g + 300g = 500g). Nach Kategorien gruppiert.</span>
+        </div>
+        <div class="divider"></div>
+        <div class="sat-bars">
+          <div class="sat-item">
+            <div class="sat-label">Customer Satisfaction</div>
+            <div class="sat-bar-bg"><div class="sat-bar-fill fill-green" style="width:100%"></div></div>
+            <div class="sat-val">5 / 5</div>
+          </div>
+          <div class="sat-item">
+            <div class="sat-label">Customer Dissatisfaction</div>
+            <div class="sat-bar-bg"><div class="sat-bar-fill fill-red" style="width:80%"></div></div>
+            <div class="sat-val">4 / 5</div>
+          </div>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Conflicts</span>
+          <span class="field-value mono">Keine</span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Supporting Materials</span>
+          <span class="field-value mono">feature-einkaufsliste.md, roadmap.md</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="usecase-tag">UC-03 · Einkaufsliste generieren</span>
+        <span class="history-tag">v1.0 · 10.05.2026</span>
+      </div>
+    </div>
+
+    <!-- REQ-004 -->
+    <div class="req-card" data-type="Funktional" data-priority="Mittel">
+      <div class="card-header">
+        <span class="card-id">REQ-004</span>
+        <div class="card-meta">
+          <span class="tag tag-functional">Funktional</span>
+          <span class="priority-badge prio-medium">Mittel</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="field-row">
+          <span class="field-label">Description</span>
+          <span class="field-value">Per Knopfdruck wird ein neuer zufälliger Wochenplan generiert, ohne dass ein Gericht doppelt vorkommt.</span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Rationale</span>
+          <span class="field-value">Erhöht die Abwechslung und den Nutzwert der Anwendung. Nutzer sollen nicht immer denselben Plan sehen.</span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Originator</span>
+          <span class="field-value">Pham Dinh Gia Cuong</span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Fit Criterion</span>
+          <span class="field-value">Bei 10 aufeinanderfolgenden Generierungen ist kein Plan identisch zum unmittelbar vorherigen.</span>
+        </div>
+        <div class="divider"></div>
+        <div class="sat-bars">
+          <div class="sat-item">
+            <div class="sat-label">Customer Satisfaction</div>
+            <div class="sat-bar-bg"><div class="sat-bar-fill fill-green" style="width:80%"></div></div>
+            <div class="sat-val">4 / 5</div>
+          </div>
+          <div class="sat-item">
+            <div class="sat-label">Customer Dissatisfaction</div>
+            <div class="sat-bar-bg"><div class="sat-bar-fill fill-red" style="width:60%"></div></div>
+            <div class="sat-val">3 / 5</div>
+          </div>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Conflicts</span>
+          <span class="field-value"><span class="conflict-badge">⚠ REQ-005 – Animationseffekte können Ladezeit erhöhen</span></span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Supporting Materials</span>
+          <span class="field-value mono">feature-wochenplan.md</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="usecase-tag">UC-04 · Plan neu generieren</span>
+        <span class="history-tag">v1.0 · 10.05.2026</span>
+      </div>
+    </div>
+
+    <!-- REQ-005 -->
+    <div class="req-card" data-type="Nicht-funktional" data-priority="Mittel">
+      <div class="card-header">
+        <span class="card-id">REQ-005</span>
+        <div class="card-meta">
+          <span class="tag tag-nonfunctional">Nicht-funktional</span>
+          <span class="priority-badge prio-medium">Mittel</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="field-row">
+          <span class="field-label">Description</span>
+          <span class="field-value">Die Anwendung muss auf einem Standardgerät mit normaler Internetverbindung (≥ 10 Mbit/s) vollständig in unter 3 Sekunden laden.</span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Rationale</span>
+          <span class="field-value">Lange Ladezeiten führen zum Abbruch durch den Nutzer. Performance ist ein zentrales Qualitätsmerkmal.</span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Originator</span>
+          <span class="field-value">Pham Dinh Gia Cuong</span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Fit Criterion</span>
+          <span class="field-value">Messung mit Browser DevTools: Ladezeit unter 3 Sekunden bei 5 aufeinanderfolgenden Tests auf Desktop und Mobil.</span>
+        </div>
+        <div class="divider"></div>
+        <div class="sat-bars">
+          <div class="sat-item">
+            <div class="sat-label">Customer Satisfaction</div>
+            <div class="sat-bar-bg"><div class="sat-bar-fill fill-green" style="width:60%"></div></div>
+            <div class="sat-val">3 / 5</div>
+          </div>
+          <div class="sat-item">
+            <div class="sat-label">Customer Dissatisfaction</div>
+            <div class="sat-bar-bg"><div class="sat-bar-fill fill-red" style="width:80%"></div></div>
+            <div class="sat-val">4 / 5</div>
+          </div>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Conflicts</span>
+          <span class="field-value"><span class="conflict-badge">⚠ REQ-004 – Animationseffekte erhöhen Ladezeit</span></span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Supporting Materials</span>
+          <span class="field-value mono">techstack.md</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="usecase-tag">UC-01, UC-04</span>
+        <span class="history-tag">v1.0 · 10.05.2026</span>
+      </div>
+    </div>
+
+    <!-- REQ-006 -->
+    <div class="req-card" data-type="Rechtlich" data-priority="Hoch">
+      <div class="card-header">
+        <span class="card-id">REQ-006</span>
+        <div class="card-meta">
+          <span class="tag tag-legal">⚖ Rechtlich</span>
+          <span class="priority-badge prio-high">Hoch</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="field-row">
+          <span class="field-label">Description</span>
+          <span class="field-value">Die Anwendung speichert und überträgt keine personenbezogenen Daten. Alle Daten verbleiben lokal im Browser.</span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Rationale</span>
+          <span class="field-value">Die Anwendung ist EU-weit nutzbar und unterliegt der DSGVO. Verstöße können zu Bußgeldern führen.</span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Originator</span>
+          <span class="field-value">Pham Dinh Gia Cuong</span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Fit Criterion</span>
+          <span class="field-value">Netzwerkanalyse zeigt keine ausgehenden Anfragen mit Nutzerdaten. Eine Datenschutzerklärung ist vorhanden.</span>
+        </div>
+        <div class="divider"></div>
+        <div style="margin-bottom:4px">
+          <span class="legal-badge">⚖ JURISTISCHE RELEVANZ: DSGVO Art. 5 & Art. 25</span>
+        </div>
+        <div class="sat-bars">
+          <div class="sat-item">
+            <div class="sat-label">Customer Satisfaction</div>
+            <div class="sat-bar-bg"><div class="sat-bar-fill fill-green" style="width:60%"></div></div>
+            <div class="sat-val">3 / 5</div>
+          </div>
+          <div class="sat-item">
+            <div class="sat-label">Customer Dissatisfaction</div>
+            <div class="sat-bar-bg"><div class="sat-bar-fill fill-red" style="width:100%"></div></div>
+            <div class="sat-val">5 / 5</div>
+          </div>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Conflicts</span>
+          <span class="field-value mono">Keine</span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Supporting Materials</span>
+          <span class="field-value mono">mission.md · DSGVO Art. 5 · DSGVO Art. 25</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="usecase-tag">UC-05 · Datenschutzkonformität</span>
+        <span class="history-tag">v1.0 · 10.05.2026</span>
+      </div>
+    </div>
+
+    <!-- REQ-007 -->
+    <div class="req-card" data-type="Nicht-funktional" data-priority="Mittel">
+      <div class="card-header">
+        <span class="card-id">REQ-007</span>
+        <div class="card-meta">
+          <span class="tag tag-nonfunctional">Nicht-funktional</span>
+          <span class="priority-badge prio-medium">Mittel</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="field-row">
+          <span class="field-label">Description</span>
+          <span class="field-value">Die Benutzeroberfläche muss auf Smartphones ab 375px Bildschirmbreite korrekt und vollständig dargestellt werden.</span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Rationale</span>
+          <span class="field-value">Ein Großteil der Nutzer greift mobil auf Webanwendungen zu. Eine nicht-responsive Seite ist nicht akzeptabel.</span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Originator</span>
+          <span class="field-value">Pham Dinh Gia Cuong</span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Fit Criterion</span>
+          <span class="field-value">Tests in Chrome DevTools bei 375px, 768px und 1280px zeigen keine Fehler. Alle Funktionen per Touch bedienbar.</span>
+        </div>
+        <div class="divider"></div>
+        <div class="sat-bars">
+          <div class="sat-item">
+            <div class="sat-label">Customer Satisfaction</div>
+            <div class="sat-bar-bg"><div class="sat-bar-fill fill-green" style="width:80%"></div></div>
+            <div class="sat-val">4 / 5</div>
+          </div>
+          <div class="sat-item">
+            <div class="sat-label">Customer Dissatisfaction</div>
+            <div class="sat-bar-bg"><div class="sat-bar-fill fill-red" style="width:100%"></div></div>
+            <div class="sat-val">5 / 5</div>
+          </div>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Conflicts</span>
+          <span class="field-value mono">Keine</span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Supporting Materials</span>
+          <span class="field-value mono">techstack.md · feature-wochenplan.md</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="usecase-tag">UC-01, UC-03</span>
+        <span class="history-tag">v1.0 · 10.05.2026 · In Bearbeitung</span>
+      </div>
+    </div>
+
+    <!-- REQ-008 -->
+    <div class="req-card" data-type="Funktional" data-priority="Niedrig">
+      <div class="card-header">
+        <span class="card-id">REQ-008</span>
+        <div class="card-meta">
+          <span class="tag tag-functional">Funktional</span>
+          <span class="priority-badge prio-low">Niedrig</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="field-row">
+          <span class="field-label">Description</span>
+          <span class="field-value">Der Nutzer kann die generierte Einkaufsliste per Klick ausdrucken oder als PDF-Datei herunterladen.</span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Rationale</span>
+          <span class="field-value">Viele Nutzer möchten die Einkaufsliste physisch beim Einkauf dabei haben oder digital speichern.</span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Originator</span>
+          <span class="field-value">Pham Dinh Gia Cuong</span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Fit Criterion</span>
+          <span class="field-value">Druck-Vorschau zeigt ausschließlich die Einkaufsliste ohne UI-Elemente. PDF-Export erzeugt lesbare Datei mit allen Zutaten.</span>
+        </div>
+        <div class="divider"></div>
+        <div class="sat-bars">
+          <div class="sat-item">
+            <div class="sat-label">Customer Satisfaction</div>
+            <div class="sat-bar-bg"><div class="sat-bar-fill fill-green" style="width:80%"></div></div>
+            <div class="sat-val">4 / 5</div>
+          </div>
+          <div class="sat-item">
+            <div class="sat-label">Customer Dissatisfaction</div>
+            <div class="sat-bar-bg"><div class="sat-bar-fill fill-red" style="width:40%"></div></div>
+            <div class="sat-val">2 / 5</div>
+          </div>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Conflicts</span>
+          <span class="field-value mono">Keine</span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Supporting Materials</span>
+          <span class="field-value mono">feature-einkaufsliste.md</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="usecase-tag">UC-06 · Liste exportieren</span>
+        <span class="history-tag">v1.0 · 10.05.2026</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TABLE VIEW -->
+  <div class="table-view" id="tableView">
+    <table>
+      <thead>
+        <tr>
+          <th>REQ #</th>
+          <th>Typ</th>
+          <th>Use Case</th>
+          <th>Description</th>
+          <th>Rationale</th>
+          <th>Originator</th>
+          <th>Fit Criterion</th>
+          <th>Sat.</th>
+          <th>Dis.</th>
+          <th>Priorität</th>
+          <th>Konflikte</th>
+          <th>Materials</th>
+          <th>History</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><span style="font-family:'DM Mono',monospace;color:var(--accent)">No.1</span></td><td><span class="tag tag-functional">Funktional</span></td><td style="font-family:'DM Mono',monospace;font-size:12px">UC-01</td><td>Wochenplan Mo–So mit je einem Hauptgericht anzeigen</td><td>Kernfunktion der Anwendung</td><td>Pham Dinh Gia Cuong</td><td>7 Tage, kein Gericht doppelt</td><td style="text-align:center;color:var(--green)">5</td><td style="text-align:center;color:var(--red)">5</td><td><span class="priority-badge prio-high">Hoch</span></td><td>–</td><td style="font-family:'DM Mono',monospace;font-size:11px">roadmap.md</td><td style="font-family:'DM Mono',monospace;font-size:11px">v1.0 10.05.2026</td></tr>
+        <tr><td><span style="font-family:'DM Mono',monospace;color:var(--accent)">No.2</span></td><td><span class="tag tag-functional">Funktional</span></td><td style="font-family:'DM Mono',monospace;font-size:12px">UC-02</td><td>Rezeptdatenbank mit ≥ 14 Einträgen verwalten</td><td>Zwei verschiedene Wochen planbar</td><td>Pham Dinh Gia Cuong</td><td>≥14 Rezepte, alle Pflichtfelder befüllt</td><td style="text-align:center;color:var(--green)">4</td><td style="text-align:center;color:var(--red)">5</td><td><span class="priority-badge prio-high">Hoch</span></td><td>–</td><td style="font-family:'DM Mono',monospace;font-size:11px">techstack.md</td><td style="font-family:'DM Mono',monospace;font-size:11px">v1.0 10.05.2026</td></tr>
+        <tr><td><span style="font-family:'DM Mono',monospace;color:var(--accent)">REQ-003</span></td><td><span class="tag tag-functional">Funktional</span></td><td style="font-family:'DM Mono',monospace;font-size:12px">UC-03</td><td>Einkaufsliste automatisch aus Wochenplan generieren</td><td>Kein manuelles Zusammensuchen</td><td>Pham Dinh Gia Cuong</td><td>Alle Zutaten summiert, nach Kategorien</td><td style="text-align:center;color:var(--green)">5</td><td style="text-align:center;color:var(--red)">4</td><td><span class="priority-badge prio-high">Hoch</span></td><td>–</td><td style="font-family:'DM Mono',monospace;font-size:11px">feature-einkaufsliste.md</td><td style="font-family:'DM Mono',monospace;font-size:11px">v1.0 10.05.2026</td></tr>
+        <tr><td><span style="font-family:'DM Mono',monospace;color:var(--accent)">REQ-004</span></td><td><span class="tag tag-functional">Funktional</span></td><td style="font-family:'DM Mono',monospace;font-size:12px">UC-04</td><td>Zufälligen neuen Wochenplan per Knopfdruck generieren</td><td>Abwechslung und Nutzwert erhöhen</td><td>Pham Dinh Gia Cuong</td><td>10 Generierungen, kein Plan identisch</td><td style="text-align:center;color:var(--green)">4</td><td style="text-align:center;color:var(--red)">3</td><td><span class="priority-badge prio-medium">Mittel</span></td><td style="color:var(--orange);font-size:12px">⚠ REQ-005</td><td style="font-family:'DM Mono',monospace;font-size:11px">feature-wochenplan.md</td><td style="font-family:'DM Mono',monospace;font-size:11px">v1.0 10.05.2026</td></tr>
+        <tr><td><span style="font-family:'DM Mono',monospace;color:var(--accent)">REQ-005</span></td><td><span class="tag tag-nonfunctional">Nicht-funktional</span></td><td style="font-family:'DM Mono',monospace;font-size:12px">UC-01, UC-04</td><td>Ladezeit unter 3 Sekunden bei ≥ 10 Mbit/s</td><td>Performance = Qualitätsmerkmal</td><td>Pham Dinh Gia Cuong</td><td>DevTools: &lt;3s bei 5 Tests</td><td style="text-align:center;color:var(--green)">3</td><td style="text-align:center;color:var(--red)">4</td><td><span class="priority-badge prio-medium">Mittel</span></td><td style="color:var(--orange);font-size:12px">⚠ REQ-004</td><td style="font-family:'DM Mono',monospace;font-size:11px">techstack.md</td><td style="font-family:'DM Mono',monospace;font-size:11px">v1.0 10.05.2026</td></tr>
+        <tr><td><span style="font-family:'DM Mono',monospace;color:var(--accent)">REQ-006</span></td><td><span class="tag tag-legal">⚖ Rechtlich</span></td><td style="font-family:'DM Mono',monospace;font-size:12px">UC-05</td><td>Keine Speicherung personenbezogener Daten (DSGVO)</td><td>EU-weite Nutzung, DSGVO-Pflicht</td><td>Pham Dinh Gia Cuong</td><td>Keine ausgehenden Datenanfragen</td><td style="text-align:center;color:var(--green)">3</td><td style="text-align:center;color:var(--red)">5</td><td><span class="priority-badge prio-high">Hoch</span></td><td>–</td><td style="font-family:'DM Mono',monospace;font-size:11px">mission.md, DSGVO</td><td style="font-family:'DM Mono',monospace;font-size:11px">v1.0 10.05.2026</td></tr>
+        <tr><td><span style="font-family:'DM Mono',monospace;color:var(--accent)">REQ-007</span></td><td><span class="tag tag-nonfunctional">Nicht-funktional</span></td><td style="font-family:'DM Mono',monospace;font-size:12px">UC-01, UC-03</td><td>Responsive Design ab 375px Bildschirmbreite</td><td>Mehrheit der Nutzer greift mobil zu</td><td>Pham Dinh Gia Cuong</td><td>DevTools 375/768/1280px fehlerfrei</td><td style="text-align:center;color:var(--green)">4</td><td style="text-align:center;color:var(--red)">5</td><td><span class="priority-badge prio-medium">Mittel</span></td><td>–</td><td style="font-family:'DM Mono',monospace;font-size:11px">techstack.md</td><td style="font-family:'DM Mono',monospace;font-size:11px">v1.0 · In Bearbeitung</td></tr>
+        <tr><td><span style="font-family:'DM Mono',monospace;color:var(--accent)">REQ-008</span></td><td><span class="tag tag-functional">Funktional</span></td><td style="font-family:'DM Mono',monospace;font-size:12px">UC-06</td><td>Einkaufsliste drucken oder als PDF exportieren</td><td>Liste physisch beim Einkauf nutzen</td><td>Pham Dinh Gia Cuong</td><td>Druck ohne UI-Elemente, PDF lesbar</td><td style="text-align:center;color:var(--green)">4</td><td style="text-align:center;color:var(--red)">2</td><td><span class="priority-badge prio-low">Niedrig</span></td><td>–</td><td style="font-family:'DM Mono',monospace;font-size:11px">feature-einkaufsliste.md</td><td style="font-family:'DM Mono',monospace;font-size:11px">v1.0 10.05.2026</td></tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<script>
+  function filterCards(type, btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.req-card').forEach(card => {
+      if (type === 'all') {
+        card.style.display = '';
+      } else if (type === 'Hoch') {
+        card.style.display = card.dataset.priority === 'Hoch' ? '' : 'none';
+      } else {
+        card.style.display = card.dataset.type.includes(type) ? '' : 'none';
+      }
+    });
+  }
+
+  function setView(view, btn) {
+    document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    if (view === 'cards') {
+      document.getElementById('cardsView').style.display = '';
+      document.getElementById('tableView').style.display = 'none';
+    } else {
+      document.getElementById('cardsView').style.display = 'none';
+      document.getElementById('tableView').style.display = 'block';
+    }
+  }
+</script>
+
+</body>
+</html>
